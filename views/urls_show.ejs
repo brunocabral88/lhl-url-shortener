@@ -1,0 +1,11 @@
+<html>
+	<head>
+		<%- include('partials/_header') %>
+	</head>
+	<body>
+		<form action="/urls/<%= shortURL %>" method="POST">
+			<input type="text" placeholder="Long url" name="longURL" />
+			<button>Update</button>
+		</form>		
+	</body>
+</html>
