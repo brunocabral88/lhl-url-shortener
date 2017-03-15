@@ -1,1 +1,10 @@
-<title>URL Shortener by Bruno Farias - LHL</title>
+<% if (username) { %>
+	<p>Hey <%= username %></p>
+	<form action="/logout" method="POST">
+		<input type="submit" value="Logout">
+	</form>
+<% } else { %>
+	<form action="/login" method="POST">
+		<input type="text" name="username" /><input type="submit" text="Login">
+	</form>
+<% } %>
