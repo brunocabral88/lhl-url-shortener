@@ -9,8 +9,8 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+	"b2xVn2": { long_url: "http://www.lighthouselabs.ca", user_id: '012346' },
+	"9sm5xK": { long_url: "http://www.google.com", user_id: '012345' }
 };
 
 let users = {
@@ -26,9 +26,9 @@ let users = {
 	}
 }
 
-function getUser(cookies) {
+function getUser(userId) {
 	for (user in users) {
-		if (cookies.user_id == users[user].id) {
+		if (userId == users[user].id) {
 			return users[user];
 		}
 	}
@@ -53,22 +53,41 @@ function checkUser(email,password) {
 	return false;
 }
 
+function urlForUser(id) {
+	const userURLs = {};
+	for (url in urlDatabase) {
+		if (urlDatabase[url].user_id == id) {
+			userURLs[url] = urlDatabase[url];
+		}
+	}
+	return userURLs;
+}
+
 // Lists all urls
 app.get('/urls',(req,res) => {
-	let currUser = getUser(req.cookies);
-	let templateVars = { 
-		urls : urlDatabase,
-		user: currUser
-	};
-	res.render('urls_index',templateVars);
+	let currUser = getUser(req.cookies.user_id);
+	if (currUser) {
+		let templateVars = {
+			urls : urlForUser(currUser.id),
+			user: currUser
+		};
+		res.render('urls_index',templateVars);		
+	} else {
+		res.redirect('/login');
+	}
 });
 
 app.get('/urls/new',(req,res) => {
-	res.render('urls_new');
+	if (getUser(req.cookies.user_id)) {
+		res.render('urls_new');	
+	} else {
+		res.redirect('/login');
+	}
+	
 });
 
 app.get('/u/:shortURL',(req,res) => {
-	let longURL = urlDatabase[req.params.shortURL];
+	let longURL = urlDatabase[req.params.shortURL].long_url;
 	if (longURL) {
 		res.redirect(longURL);	
 	} else {
@@ -78,7 +97,7 @@ app.get('/u/:shortURL',(req,res) => {
 });
 
 app.get('/urls/:id',(req,res) => {
-	let currUser = getUser(req.cookies); 
+	let currUser = getUser(req.cookies.user_id);
 	let templateVars = { 
 		shortURL: req.params.id,
 		user: currUser
@@ -106,8 +125,12 @@ app.get('/login',(req,res) => {
 
 // Update record /urls/:id
 app.post('/urls/:id',(req,res) => {
-	if (urlDatabase.hasOwnProperty(req.params.id)) {
-		urlDatabase[req.params.id] = req.body.longURL;
+	const user = getUser(req.cookies.user_id);
+	if (!user) {
+		res.redirect('/urls');
+	}
+	else if(urlDatabase.hasOwnProperty(req.params.id) && urlDatabase[req.params.id].user_id == user.id) {
+		urlDatabase[req.params.id].long_url = req.body.longURL;
 		res.redirect('/urls');
 	} else {
 		res.redirect('/urls');
@@ -116,8 +139,17 @@ app.post('/urls/:id',(req,res) => {
 
 // New records (to be implemented)
 app.post('/urls',(req,res) => {
-	console.log(req.body);
-	res.send('OK');
+	const user = getUser(req.cookies.user_id);
+	if (user) {
+		const urlID = generateRandomString();
+		urlDatabase[urlID] = { };
+		urlDatabase[urlID].long_url = req.body.longURL;
+		urlDatabase[urlID].user_id = user.id;
+		res.redirect('/urls');
+	} else {
+		res.redirect('urls_login');
+	}
+	
 });
 
 // POST /login
@@ -125,10 +157,8 @@ app.post('/login',(req,res) => {
 	let userid = checkUser(req.body.username, req.body.password);
 	if (userid) {
 		res.cookie('user_id',userid);
-		console.log('User sucessfully logged in: ',userid);
 		res.redirect('/urls');
 	} else {
-		console.log('Failed attempt to login: ', req.body.username);
 		res.sendStatus(403);
 	}
 });
@@ -151,7 +181,6 @@ app.post('/register',(req,res) => {
 		password: req.body.password
 	};
 	res.cookie('user_id',newUserID);
-	console.log(users);
 	res.redirect('/urls');
 });
 

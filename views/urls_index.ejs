@@ -6,11 +6,19 @@
 <body>
 	<%- include('partials/_header') %>
 	<ul>
-	    <% for (url in urls) { %>
-			<li><%= urls[url] %> | <a href="/urls/<%= url %>">Update</a>
-				<form action="<%= "/urls/" + url + "/delete" %>" method="post"><button>Delete</button></form>
-			</li>
-	    <% } %>
+		<% if (user) { %>
+		    <% for (url in urls) { %>
+				<li><%= urls[url].long_url %> - Shortened URL: <a href="http://localhost:8080/u/<%= url %>">http://localhost:8080/u/<%= url %></a>
+					<% if (urls[url].user_id == user.id) { %>
+						| <a href="/urls/<%= url %>">Update</a>
+						<form action="<%= "/urls/" + url + "/delete" %>" method="post"><button>Delete</button></form>
+					<% }%>
+				</li>
+		    <% } %>
+		<% } else { %>
+			<h3>Please login or register to view the urls</h3>
+		<% } %>
     </ul>
+    <a href="/urls/new">Create new link</a>
 </body>
 </html>
