@@ -1,24 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<title>URL Shortener by Bruno Farias - LHL</title>
-</head>
-<body>
-	<%- include('partials/_header') %>
-	<ul>
+<%- include('partials/_header') %>
+	<ul class="list-group">
 		<% if (user) { %>
 		    <% for (url in urls) { %>
-				<li><%= urls[url].long_url %> - Shortened URL: <a href="http://localhost:8080/u/<%= url %>">http://localhost:8080/u/<%= url %></a>
+				<li class="list-group-item"><%= urls[url].long_url %> - Shortened URL: <a target="_alt" href="http://localhost:8080/u/<%= url %>">http://localhost:8080/u/<%= url %></a>
 					<% if (urls[url].user_id == user.id) { %>
-						| <a href="/urls/<%= url %>">Update</a>
-						<form action="<%= "/urls/" + url + "/delete" %>" method="post"><button>Delete</button></form>
+							<div class="pull-right"><a class="btn btn-default" href="/urls/<%= url %>">Update</a>
+								<form style="display: inline;" action="<%= "/urls/" + url + "/delete" %>" method="post"><input type="submit" value="Delete" class="btn btn-danger" />
+								</form>
+							</div>
 					<% }%>
 				</li>
 		    <% } %>
 		<% } else { %>
 			<h3>Please login or register to view the urls</h3>
 		<% } %>
-    </ul>
-    <a href="/urls/new">Create new link</a>
-</body>
-</html>
+	</ul>
+	<h5>Shortened URLs are public, feel free to share them with the world</h5>
+	<a href="/urls/new" class="btn btn-success">Create new link</a>
+<%- include('partials/_footer') %>

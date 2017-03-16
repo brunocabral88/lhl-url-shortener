@@ -69,6 +69,10 @@ function urlForUser(id) {
 	return userURLs;
 }
 
+app.get('/',(req,res) => {
+	res.redirect('/urls');
+})
+
 // Lists all urls
 app.get('/urls',(req,res) => {
 	let currUser = getUser(req.session.user_id);
@@ -83,6 +87,7 @@ app.get('/urls',(req,res) => {
 	}
 });
 
+// Urls index (user private)
 app.get('/urls/new',(req,res) => {
 	if (getUser(req.session.user_id)) {
 		res.render('urls_new');	
@@ -92,6 +97,7 @@ app.get('/urls/new',(req,res) => {
 	
 });
 
+// Url public redirection
 app.get('/u/:shortURL',(req,res) => {
 	let longURL = urlDatabase[req.params.shortURL].long_url;
 	if (longURL) {
@@ -110,7 +116,7 @@ app.get('/urls/:id',(req,res) => {
 	}
 	res.render('urls_show',templateVars);
 });
-
+// Registration page
 app.get('/register',(req,res) => {
 	res.render('url_register');
 });
@@ -169,7 +175,7 @@ app.post('/login',(req,res) => {
 	}
 });
 
-// Registration post
+// User registration post
 app.post('/register',(req,res) => {
 	if (!req.body.username || !req.body.password) {
 		res.sendStatus(400);
@@ -190,6 +196,7 @@ app.post('/register',(req,res) => {
 	res.redirect('/urls');
 });
 
+// Logout post
 app.post('/logout',(req,res) => {
 	if (req.session.user_id) {
 		req.session = null;
@@ -199,5 +206,4 @@ app.post('/logout',(req,res) => {
 
 app.listen(PORT,() => {
 	console.log(`Running and listening on port ${PORT}`);
-	console.log(users);
 })

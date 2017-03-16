@@ -4,9 +4,9 @@
 	</head>
 	<body>
 		<%- include('partials/_header') %>
-		<form action="/urls/<%= shortURL %>" method="POST">
-			<input type="text" placeholder="Long url" name="longURL" />
-			<button>Update</button>
+		<form action="/urls/<%= shortURL %>" class="form-group" method="POST">
+			<input type="text" placeholder="New long URL" name="longURL" />
+			<button class="btn btn-success">Update</button>
 		</form>		
 	</body>
 </html>
