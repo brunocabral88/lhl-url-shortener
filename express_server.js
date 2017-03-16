@@ -8,10 +8,32 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-var urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+let users = {
+	012345: {
+		id: "012345",
+		email: "test@test.org",
+		password: "test123"
+	},
+	012346: {
+		id: "012346",
+		email: "test2@test.org",
+		password: "password"
+	}
+}
+
+function getUser(cookies) {
+	for (user in users) {
+		if (cookies.user_id == users[user].id) {
+			return users[user];
+		}
+	}
+	return null;
+}
 
 function generateRandomString() {
 	let output = '';
@@ -22,11 +44,21 @@ function generateRandomString() {
 	return output;
 }
 
+// Check user returns the user id or false
+function checkUser(email,password) {
+	for (user in users) {
+		if (users[user].email == email && users[user].password == password)
+			return users[user].id;
+	}
+	return false;
+}
+
 // Lists all urls
 app.get('/urls',(req,res) => {
+	let currUser = getUser(req.cookies);
 	let templateVars = { 
 		urls : urlDatabase,
-		username: req.cookies.username
+		user: currUser
 	};
 	res.render('urls_index',templateVars);
 });
@@ -46,17 +78,16 @@ app.get('/u/:shortURL',(req,res) => {
 });
 
 app.get('/urls/:id',(req,res) => {
+	let currUser = getUser(req.cookies); 
 	let templateVars = { 
 		shortURL: req.params.id,
-		username: req.cookies.username
+		user: currUser
 	}
 	res.render('urls_show',templateVars);
 });
 
-// New records (to be implemented)
-app.post('/urls',(req,res) => {
-	console.log(req.body);
-	res.send('OK');
+app.get('/register',(req,res) => {
+	res.render('url_register');
 });
 
 // Handles deletion
@@ -69,6 +100,10 @@ app.post('/urls/:id/delete',(req,res) => {
 	}
 });
 
+app.get('/login',(req,res) => {
+	res.render('urls_login');
+});
+
 // Update record /urls/:id
 app.post('/urls/:id',(req,res) => {
 	if (urlDatabase.hasOwnProperty(req.params.id)) {
@@ -79,17 +114,50 @@ app.post('/urls/:id',(req,res) => {
 	}
 });
 
+// New records (to be implemented)
+app.post('/urls',(req,res) => {
+	console.log(req.body);
+	res.send('OK');
+});
+
 // POST /login
 app.post('/login',(req,res) => {
-	if (req.body.username) {
-		res.cookie('username',req.body.username);
+	let userid = checkUser(req.body.username, req.body.password);
+	if (userid) {
+		res.cookie('user_id',userid);
+		console.log('User sucessfully logged in: ',userid);
+		res.redirect('/urls');
+	} else {
+		console.log('Failed attempt to login: ', req.body.username);
+		res.sendStatus(403);
 	}
+});
+
+// Registration post
+app.post('/register',(req,res) => {
+	if (!req.body.username || !req.body.password) {
+		res.sendStatus(400);
+		return;
+	}
+	let userid = checkUser(req.body.username, req.body.password)
+	if (userid) {
+		res.sendStatus(400);
+		return;
+	}
+	let newUserID = generateRandomString();
+	users[newUserID] = {
+		id: newUserID,
+		email: req.body.username,
+		password: req.body.password
+	};
+	res.cookie('user_id',newUserID);
+	console.log(users);
 	res.redirect('/urls');
 });
 
 app.post('/logout',(req,res) => {
-	if (req.cookies.username) {
-		res.clearCookie('username');
+	if (req.cookies.user_id) {
+		res.clearCookie('user_id');
 	}
 	res.redirect('/urls');
 })
