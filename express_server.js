@@ -149,7 +149,8 @@ app.get('/urls/:id',(req,res) => {
     let currUser = getUser(req.session.user_id);
     let templateVars = { 
         url: urlDatabase[req.params.id],
-        user: currUser,
+        url_id: req.params.id,
+        user: currUser
     }
     res.render('urls_show',templateVars);
 });
