@@ -4,9 +4,18 @@
 	</head>
 	<body>
 		<%- include('partials/_header') %>
-		<form action="/urls/<%= shortURL %>?_method=PUT" class="form-group" method="POST">
+		<form action="/urls/<%= url.shortURL %>?_method=PUT" class="form-group" method="POST">
 			<input type="text" placeholder="New long URL" name="longURL" />
 			<button class="btn btn-success">Update</button>
-		</form>		
+		</form>
+		<span>This short link has been clicked <%= url.clicks %> times (Unique visitors: <%= url.unique_visitors %>)</span>	
+		<h3>List os visits for this website</h3>
+		<ul>
+			<% if (url.visits) url.visits.forEach((visit) => { %>
+				<li>
+					Visit date: <%= visit.timestamp %> by visitor id: <%= visit.visitor_id %>
+				</li>
+			<% }) %>
+		</ul>
 	</body>
 </html>
