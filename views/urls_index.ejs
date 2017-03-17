@@ -5,7 +5,7 @@
 				<li class="list-group-item"><%= urls[url].long_url %> - Shortened URL: <a target="_alt" href="http://localhost:8080/u/<%= url %>">http://localhost:8080/u/<%= url %></a>
 					<% if (urls[url].user_id == user.id) { %>
 							<div class="pull-right"><a class="btn btn-default" href="/urls/<%= url %>">Update</a>
-								<form style="display: inline;" action="<%= "/urls/" + url + "/delete" %>" method="post"><input type="submit" value="Delete" class="btn btn-danger" />
+								<form style="display: inline;" action="<%= "/urls/" + url + "?_method=DELETE" %>" method="post"><input type="submit" value="Delete" class="btn btn-danger" />
 								</form>
 							</div>
 					<% }%>

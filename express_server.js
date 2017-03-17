@@ -1,12 +1,13 @@
-let express = require('express');
-let app = express();
-let PORT = 8080;
+const express = require('express');
+const app = express();
+const PORT = 8080;
 const bodyParser = require('body-parser');
-// const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 app.use(cookieSession({
 	name: 'session',
 	keys: ['lighthouselabs'],
@@ -121,8 +122,8 @@ app.get('/register',(req,res) => {
 	res.render('url_register');
 });
 
-// Handles deletion
-app.post('/urls/:id/delete',(req,res) => {
+// REST Delete resource
+app.delete('/urls/:id',(req,res) => {
 	if (urlDatabase.hasOwnProperty(req.params.id)) {
 		delete urlDatabase[req.params.id];
 		res.redirect('/urls');
@@ -131,12 +132,13 @@ app.post('/urls/:id/delete',(req,res) => {
 	}
 });
 
+
 app.get('/login',(req,res) => {
 	res.render('urls_login');
 });
 
-// Update record /urls/:id
-app.post('/urls/:id',(req,res) => {
+// REST Update record
+app.put('/urls/:id',(req,res) => {
 	const user = getUser(req.session.user_id);
 	if (!user) {
 		res.redirect('/urls');
